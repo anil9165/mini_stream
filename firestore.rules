@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isSuperAdminEmail() {
+      return signedIn()
+        && request.auth.token.email == 'superadmin@gmail.com';
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && (isSuperAdminEmail()
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin');
+    }
+
+    function validOwnRole() {
+      return request.resource.data.role in ['user', 'admin']
+        || (
+          resource != null
+          && resource.data.role == 'superadmin'
+          && request.resource.data.role == 'superadmin'
+        );
+    }
+
+    function onlyViewerCountChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewerCount']);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && validOwnRole();
+    }
+
+    match /app_config/{configId} {
+      allow read: if signedIn();
+      allow create, update: if configId == 'agora' && isSuperAdmin();
+    }
+
+    match /live_streams/{streamId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        && request.resource.data.hostId == request.auth.uid;
+      allow update: if (isAdmin() && resource.data.hostId == request.auth.uid)
+        || (signedIn() && onlyViewerCountChanged());
+      allow delete: if isAdmin() && resource.data.hostId == request.auth.uid;
+
+      match /messages/{messageId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.authorId == request.auth.uid;
+      }
+    }
+
+    match /rtmp_destinations/{destinationId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /analytics/{streamId} {
+      allow read, create, update: if signedIn();
+    }
+
+    match /stream_events/{eventId} {
+      allow read, create: if signedIn();
+    }
+  }
+}
