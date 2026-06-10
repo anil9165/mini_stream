@@ -1,7 +1,7 @@
 class AppConstants {
   static const appName = 'Mini Live';
-  static const agoraAppId = 'e60bee36e0934721b0bb9057552214a8';
+  static const agoraAppId = 'e44daa40bce74627bf628d1bc3f62af9';
   static const agoraChannel = 'mini';
   static const agoraTempToken =
-      '007eJxTYFgf4NcmwC6T5yWm8oxZUWWzhPqVh54mJiYy3a86vmdPZlRgSDUzSEpNNTZLNbA0NjE3MkwySEqyNDA1NzU1MjI0SbRYyKiZ1RDIyMBo7MAKJMEQxGdhyM3My2RgAAC2eBkv';
+      '007eJxTYNihcVPAzVXgG5dp/S0/hvIb8/d/idec8+Vb73Hn0tikQ4EKDKkmJimJiSYGScmp5iZmRuZJaWZGFimGScnGQEZimuVMd82shkBGhr+iikyMDBAI4rMw5GbmZTIwAABRBR9d';
 }
